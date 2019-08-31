@@ -2,9 +2,9 @@ const { response, request } = require('express')
 const Ably = require('ably')
 const _request = require('request-promise')
 const { ApplicationModel } = require('../model/app.schema')
+const { API_KEY, Zappier_URL } = require('../keys')
 
-const Zappier_URL = 'https://hooks.zapier.com/hooks/catch/5593907/o34bwqy/'
-const API_KEY = 'AAMnQQ.4peV5A:yIsRkNBht2kdsOG0'
+
 
 const httpOptions = body => {
   return {
@@ -23,20 +23,20 @@ const httpOptions = body => {
  * @param {response} res
  */
 exports.ablyTrigger = (req, res) => {
-    // init Ably
+  // init Ably
   const rest = new Ably.Rest(`${API_KEY}`)
   // check if req is from ably
   console.log('Body Request', req.body)
   // init webHook for usage
   const webhookMessages = req.body
-    
+
   // get items from webHookMessages
   for (const item of webhookMessages.items) {
-      // get decode ably messages
+    // get decode ably messages
     const messages = Ably.Realtime.Message.fromEncodedArray(item.data.messages)
     // loop through messages
     for (const message of messages) {
-        // set staffId
+      // set staffId
       const staffId = message.data.staffId
       // create new channel
       const channels = rest.channels.get('attendant:bot:' + staffId)
@@ -45,14 +45,14 @@ exports.ablyTrigger = (req, res) => {
       //zappier webhook
       _request(httpOptions({ message: response, staffId }))
         .then(zap => {
-            // log zap request
+          // log zap request
           console.log('Zap', zap)
-          // publish new channel 
+          // publish new channel
           channels.publish('bot', zap, err => {
             if (err) {
               res.status(400).send('Failed')
             } else {
-            // get applicatiion model
+              // get applicatiion model
               const timeLog = new ApplicationModel({ staffId })
               // save to DB
               timeLog.save((err, logged) => {
