@@ -1,0 +1,24 @@
+.pull-right {
+  float: right;
+}
+
+element.style {
+  outline: aliceblue;
+}
+
+.form-control:focus {
+  color: #495057;
+  background-color: none !important;
+  border-color: none !important;
+  outline: 0;
+  box-shadow: none !important;
+}
+
+.success {
+  display: none;
+}
+
+.denied {
+  display: none;
+  color: red;
+}

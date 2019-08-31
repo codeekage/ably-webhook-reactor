@@ -4,6 +4,7 @@ const bodyParser = require('body-parser')
 const cors = require('cors')
 const { authTrigger, ablyTrigger } = require('./triggers/app.http.trigger')
 const mongoose = require('mongoose')
+const path = require('path')
 
 // initialise express
 const app = express()
@@ -35,6 +36,9 @@ app.use(cors())
 // Parse JSON in Request Body
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
+
+//serve static files
+app.use('/', express.static(path.join(__dirname, 'public')))
 
 // application routes
 app.post('/ably', ablyTrigger)

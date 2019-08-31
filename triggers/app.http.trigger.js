@@ -4,8 +4,6 @@ const _request = require('request-promise')
 const { ApplicationModel } = require('../model/app.schema')
 const { API_KEY, Zappier_URL } = require('../keys')
 
-
-
 const httpOptions = body => {
   return {
     method: 'POST',
@@ -37,13 +35,13 @@ exports.ablyTrigger = (req, res) => {
     // loop through messages
     for (const message of messages) {
       // set staffId
-      const staffId = message.data.staffId
+      const { staffId, staffName } = message.data
       // create new channel
       const channels = rest.channels.get('attendant:bot:' + staffId)
       // responsed message
       const response = 'Welcome to work'
       //zappier webhook
-      _request(httpOptions({ message: response, staffId }))
+      _request(httpOptions({ message: response, staffId, staffName }))
         .then(zap => {
           // log zap request
           console.log('Zap', zap)
