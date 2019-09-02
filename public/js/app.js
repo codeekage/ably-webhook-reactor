@@ -60,7 +60,7 @@ function webHook(staffName, keycode) {
   console.log(clientID)
 
   const outBoundChannels = ably.channels.get('attendant:staff:' + clientID)
-  outBoundChannels.publish('staff', { staffId: clientID, staffName, keycode })
+  outBoundChannels.publish('staff', { clientID, staffName, keycode })
 
   outBoundChannels.subscribe('staff', message => console.log(message))
 

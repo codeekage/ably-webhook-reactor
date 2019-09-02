@@ -2,14 +2,19 @@ const mongoose = require('mongoose')
 
 // initialise application schema
 const ApplicatonSchema = new mongoose.Schema({
+
   timeLog: {
     type: Date,
     default: Date.now(),
     required: true
   },
-  staffID: {
+  clientID: {
     type: String,
     required: true
+  },
+  staffName : {
+    type : String,
+    required : true
   }
 })
 

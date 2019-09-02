@@ -1,13 +1,15 @@
 const { response, request } = require('express')
 const Ably = require('ably')
 const _request = require('request-promise')
-const { ApplicationModel } = require('../model/app.schema')
-const { API_KEY, Zappier_URL } = require('../keys')
+const { ApplicationModel } = require('../model/app.model')
+
+const API_KEY = process.env.ABLY_API_KEY,
+  ZAPIER_URL = process.env.ZAPIER_URL
 
 const httpOptions = body => {
   return {
     method: 'POST',
-    uri: `${Zappier_URL}`,
+    uri: `${ZAPIER_URL}`,
     body,
     headers: {
       'Content-Type': 'application/json'
@@ -20,7 +22,7 @@ const httpOptions = body => {
  * @param {request} req
  * @param {response} res
  */
-exports.ablyTrigger = (req, res) => {
+exports.webHookController = (req, res) => {
   // init Ably
   const rest = new Ably.Rest(`${API_KEY}`)
   // check if req is from ably
@@ -35,13 +37,13 @@ exports.ablyTrigger = (req, res) => {
     // loop through messages
     for (const message of messages) {
       // set staffId
-      const { staffId, staffName } = message.data
+      const { clientID, staffName } = message.data
       // create new channel
-      const channels = rest.channels.get('attendant:bot:' + staffId)
+      const channels = rest.channels.get('attendant:bot:' + clientID)
       // responsed message
       const response = 'Welcome to work'
       //zappier webhook
-      _request(httpOptions({ message: response, staffId, staffName }))
+      _request(httpOptions({ message: response, clientID, staffName }))
         .then(zap => {
           // log zap request
           console.log('Zap', zap)
@@ -51,7 +53,7 @@ exports.ablyTrigger = (req, res) => {
               res.status(400).send('Failed')
             } else {
               // get applicatiion model
-              const timeLog = new ApplicationModel({ staffId })
+              const timeLog = new ApplicationModel({ clientID, staffName })
               // save to DB
               timeLog.save((err, logged) => {
                 if (err) {
@@ -74,7 +76,7 @@ exports.ablyTrigger = (req, res) => {
  * @param {request} req
  * @param {response} res
  */
-exports.authTrigger = (req, res) => {
+exports.authController = (req, res) => {
   const rest = new Ably.Rest({ key: `${API_KEY}` })
   rest.auth.requestToken({ clientId: '*' }, function(err, token) {
     if (err) {

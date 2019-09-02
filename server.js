@@ -1,8 +1,9 @@
-// import dependcies
+ // import dependcies
+require('dotenv').config()
 const express = require('express')
 const bodyParser = require('body-parser')
 const cors = require('cors')
-const { authTrigger, ablyTrigger } = require('./triggers/app.http.trigger')
+const { authController, webHookController } = require('./controller/app.controller')
 const mongoose = require('mongoose')
 const path = require('path')
 
@@ -11,10 +12,14 @@ const app = express()
 
 // initialise application PORT
 const PORT = process.env.PORT || 8080
+//
+
+const mongoDB_URL  = process.env.MONGODB_URL || 'mongodb://localhost:27017/ably'
+
+console.log(mongoDB_URL)
 
 // connect to MongoDB using Mongoose
-mongoose.connect(
-  'mongodb+srv://ably-reactor:5Fm9TmDREzVNrxp@cluster0-etojd.gcp.mongodb.net/test?retryWrites=true&w=majority',
+mongoose.connect(mongoDB_URL,
   {
     useNewUrlParser: true,
     useCreateIndex: true,
@@ -25,7 +30,7 @@ mongoose.connect(
       console.error(`Error connecting to MongoDB: ${err}`)
       return
     }
-    console.log(`connection to MongoDB was successfull`)
+    console.log(`connection to MongoDB was successful`)
   }
 )
 
@@ -41,11 +46,12 @@ app.use(bodyParser.json())
 app.use('/', express.static(path.join(__dirname, 'public')))
 
 // application routes
-app.post('/ably', ablyTrigger)
+app.post('/ably', webHookController)
 // auth and genrate token
-app.get('/auth', authTrigger)
+app.get('/auth', authController)
 
 // start express server
 app.listen(PORT, () => {
   console.info(`Application running on port : ${PORT}`)
 })
+ 
